@@ -1,0 +1,2590 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#060911">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tosca SaaS">
+    <title>SaaS Social Media Performance & Analytics Platform - Tosca Care Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>if(!window.supabase && !window.supabase?.createClient){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
+    <style>
+        /* Hallmark · macrostructure: Workbench · genre: modern-minimal · tone: technical
+         * theme: custom (tosca teal, deglowed) · redesign: visual-layer-only, JS/logic untouched */
+        :root {
+            --bg-dark: #0a0d14;
+            --card-bg: rgba(15, 20, 32, 0.92);
+            --card-border: rgba(148, 163, 184, 0.14);
+            --card-glow: rgba(20, 184, 166, 0.06);
+            --tosca-primary: #14b8a6;
+            --tosca-light: #2dd4bf;
+            --tosca-hover: #0d9488;
+            --tosca-glow: rgba(20, 184, 166, 0.14);
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --accent-blue: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-sub: #cbd5e1;
+            --input-bg: #090e1a;
+            --wa-bg: #0b141a;
+            --wa-bubble: #005c4b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 20% 10%, rgba(20, 184, 166, 0.06) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 3rem;
+        }
+
+        /* SaaS Top Navbar */
+        .saas-navbar {
+            background: rgba(9, 14, 26, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+            padding: 0.85rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .saas-brand-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+
+        .saas-brand-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--tosca-primary) 0%, var(--accent-blue) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 0.9rem;
+            box-shadow: 0 0 15px var(--tosca-glow);
+        }
+
+        .nav-mode-tabs {
+            display: flex;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-tab-btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-tab-btn:hover {
+            color: #ffffff;
+        }
+
+        .nav-tab-btn.active {
+            background: linear-gradient(135deg, var(--tosca-primary) 0%, var(--tosca-hover) 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px var(--tosca-glow);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 2rem auto 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header UI */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            background: rgba(20, 184, 166, 0.1);
+            border: 1px solid rgba(20, 184, 166, 0.3);
+            border-radius: 999px;
+            color: var(--tosca-light);
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--tosca-light);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Brand Selector Bar */
+        .brand-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .brand-bar-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-pills {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .brand-pills {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .brand-pills {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .brand-pill {
+            background: rgba(9, 14, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        .brand-pill:hover {
+            border-color: rgba(20, 184, 166, 0.4);
+            transform: translateY(-2px);
+            background: rgba(13, 21, 39, 0.9);
+        }
+
+        .brand-pill.active {
+            background: rgba(20, 184, 166, 0.14);
+            border-color: var(--tosca-primary);
+        }
+
+        .brand-pill-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #ffffff;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-pill-group {
+            font-size: 0.73rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-pill.active .brand-pill-group {
+            background: rgba(20, 184, 166, 0.25);
+            color: var(--tosca-light);
+            border-color: var(--tosca-primary);
+        }
+
+        .brand-pill-quota {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Layout Grid */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card System */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-top: 2px solid rgba(20, 184, 166, 0.35);
+            border-radius: 24px;
+            padding: 1.75rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.45);
+            margin-bottom: 1.75rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+        }
+
+        .icon-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: rgba(20, 184, 166, 0.12);
+            border: 1px solid rgba(20, 184, 166, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--tosca-light);
+            flex-shrink: 0;
+        }
+
+        .icon-badge svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.2;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 0.55rem;
+            letter-spacing: 0.2px;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 0.8rem 1.1rem;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 14px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2314b8a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.1rem center;
+            padding-right: 2.75rem;
+            cursor: pointer;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--tosca-primary);
+            box-shadow: 0 0 0 3px var(--tosca-glow), 0 4px 12px rgba(0, 0, 0, 0.3);
+            background: #0d1527;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Task Manager */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(9, 14, 26, 0.7);
+            padding: 0.65rem 0.85rem;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.2s ease;
+        }
+
+        .task-num {
+            color: var(--tosca-light);
+            font-weight: 700;
+            font-size: 0.9rem;
+            min-width: 22px;
+        }
+
+        .task-item input[type="text"] {
+            padding: 0.5rem 0.85rem;
+            font-size: 0.9rem;
+            border-radius: 10px;
+        }
+
+        .btn-del-task {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: var(--accent-red);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .btn-add-task {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--tosca-light);
+            background: rgba(20, 184, 166, 0.1);
+            border: 1px dashed rgba(20, 184, 166, 0.35);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Quick Action Chips */
+        .quick-actions {
+            display: flex;
+            gap: 0.65rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-sub);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+
+        .btn-chip:hover {
+            background: rgba(20, 184, 166, 0.15);
+            border-color: var(--tosca-primary);
+            color: #ffffff;
+        }
+
+        .btn-chip-primary {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.25) 0%, rgba(13, 148, 136, 0.35) 100%);
+            border-color: rgba(45, 212, 191, 0.4);
+            color: var(--tosca-light);
+        }
+
+        /* Calendar Grid Pills */
+        .calendar-header-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--tosca-light);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .date-grid.calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        @media (max-width: 640px) {
+            .date-grid.calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .calendar-header-days {
+                display: none;
+            }
+        }
+
+        .date-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 4px;
+            border-radius: 12px;
+            background: rgba(9, 14, 26, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .date-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .date-pill.done { background: rgba(16, 185, 129, 0.18); border-color: rgba(16, 185, 129, 0.5); }
+        .date-pill.done .day-num { color: #34d399; font-weight: 800; }
+        .date-pill.process { background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.5); }
+        .date-pill.process .day-num { color: #fbbf24; font-weight: 800; }
+        .date-pill.pending { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); }
+        .date-pill.pending .day-num { color: #f87171; }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            background: rgba(9, 14, 26, 0.9);
+            border-radius: 999px;
+            height: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 0.6rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--tosca-primary), #34d399);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* OCR Dropzone */
+        .ocr-dropzone {
+            border: 2px dashed rgba(20, 184, 166, 0.35);
+            background: rgba(20, 184, 166, 0.04);
+            border-radius: 16px;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: all 0.25s ease;
+        }
+
+        .ocr-dropzone:hover {
+            border-color: var(--tosca-light);
+            background: rgba(20, 184, 166, 0.1);
+        }
+
+        .ocr-dropzone-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .ocr-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(20, 184, 166, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--tosca-light);
+        }
+
+        .ocr-text strong { font-size: 0.92rem; color: #ffffff; display: block; }
+        .ocr-text p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+        .spinner { display: inline-block; animation: spin 1s infinite linear; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* WA Live Preview Frame */
+        .wa-mock-frame {
+            background: var(--wa-bg);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .wa-header-bar {
+            background: #202c33;
+            padding: 0.85rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .wa-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--tosca-primary) 0%, #10b981 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #ffffff;
+            font-size: 0.85rem;
+        }
+
+        .wa-contact-info h4 { font-size: 0.95rem; font-weight: 700; color: #e9edef; }
+        .wa-contact-info p { font-size: 0.75rem; color: #8696a0; }
+
+        .wa-bubble-container {
+            padding: 1.25rem;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+            background-size: 16px 16px;
+        }
+
+        .wa-bubble {
+            background: var(--wa-bubble);
+            color: #e9edef;
+            padding: 1.25rem;
+            border-radius: 14px;
+            border-top-left-radius: 3px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .action-buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 1.25rem;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.95rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+        }
+
+        .btn-copy { background: linear-gradient(135deg, var(--tosca-primary) 0%, var(--tosca-hover) 100%); color: #ffffff; box-shadow: 0 10px 25px var(--tosca-glow); }
+        .btn-save-db { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); }
+
+        /* Executive Dashboard Specific UI */
+        .kpi-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) { .kpi-summary-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .kpi-summary-grid { grid-template-columns: 1fr; } }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(20, 184, 166, 0.12);
+            border: 1px solid rgba(20, 184, 166, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--tosca-light);
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .kpi-val { font-size: 1.6rem; font-weight: 800; color: #ffffff; line-height: 1.2; }
+        .kpi-lbl { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+        /* Reports Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(9, 14, 26, 0.7);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.88rem;
+        }
+
+        .data-table th {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 1rem;
+            color: var(--text-sub);
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover {
+            background: rgba(20, 184, 166, 0.05);
+        }
+
+        /* Toast Alert Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #064e3b;
+            border: 1px solid #10b981;
+            color: #ffffff;
+            padding: 14px 22px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.35);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 999;
+        }
+
+        /* Mobile App Navigation Bar */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(9, 14, 26, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1px solid rgba(45, 212, 191, 0.25);
+            z-index: 999;
+            justify-content: space-around;
+            align-items: center;
+            padding: 4px 8px;
+            box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            gap: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            flex: 1;
+            padding: 6px 0;
+            border: none;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--tosca-light);
+        }
+
+        .mobile-nav-item svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.2;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 80px;
+            }
+            .saas-navbar {
+                padding: 0.75rem 1rem;
+            }
+            .nav-mode-tabs {
+                display: none !important;
+            }
+            .mobile-bottom-nav {
+                display: flex;
+            }
+            .brand-pills {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                padding-bottom: 6px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .brand-pill {
+                min-width: 230px;
+                scroll-snap-align: start;
+                flex-shrink: 0;
+            }
+            .card {
+                padding: 1.2rem;
+                border-radius: 20px;
+            }
+            h1 {
+                font-size: 1.7rem;
+            }
+        }
+
+        /* DB Modal Config */
+        .modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.78);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+
+        .modal-box {
+            background: #0d1527;
+            border: 1px solid var(--tosca-primary);
+            border-radius: 20px;
+            padding: 1.75rem;
+            width: 90%;
+            max-width: 540px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+<!-- SaaS Top Navbar -->
+<nav class="saas-navbar">
+    <div class="saas-brand-title">
+        <div class="saas-brand-logo">TC</div>
+        <span>Tosca Care SaaS Analytics</span>
+    </div>
+
+    <!-- Navigation Switcher -->
+    <div class="nav-mode-tabs">
+        <button class="nav-tab-btn active" id="btnModeSpecialist" onclick="switchNavMode('specialist')">
+            <span>📝 Input Specialist</span>
+        </button>
+        <button class="nav-tab-btn" id="btnModeExecutive" onclick="switchNavMode('executive')">
+            <span>📊 Dashboard Atasan</span>
+        </button>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span id="syncStatusBadge" style="font-size:0.75rem; font-weight:700; color:var(--accent-green); background:rgba(16,185,129,0.1); padding:4px 10px; border-radius:999px; border:1px solid rgba(16,185,129,0.3);">🟢 Cloud Synced</span>
+        <button type="button" class="btn-chip" onclick="openSupabaseModal()" style="font-size:0.78rem;">⚡ Supabase DB</button>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container">
+
+    <!-- VIEW 1: SPECIALIST INPUT MODE -->
+    <div id="viewSpecialist">
+        <!-- Header -->
+        <header>
+            <div class="badge-status">
+                <span class="pulse-dot"></span> Multi-Brand Performance Tracker Suite
+            </div>
+            <h1>WhatsApp Social Media Report Generator</h1>
+            <p>Kelola 4 brand utama, pelacakan target kuota (Feed, Story, Reels), dan ekspor laporan WhatsApp otomatis</p>
+        </header>
+
+        <!-- Brand Selector Header Bar -->
+        <div class="brand-bar">
+            <div class="brand-bar-title">
+                <span>PILIH BRAND / AKUN AKTIF</span>
+                <span style="font-size:0.78rem; color:var(--tosca-light);">Auto-Save DB Enabled</span>
+            </div>
+            <div class="brand-pills">
+                <div class="brand-pill active" data-brand="Tosca Care" onclick="selectBrand('Tosca Care')">
+                    <div class="brand-pill-name">
+                        <span>Tosca Care</span>
+                        <span class="brand-pill-group">Group A</span>
+                    </div>
+                    <div class="brand-pill-quota">Feed 1/hari • Story 10/hari • Reels min 4/minggu</div>
+                </div>
+                <div class="brand-pill" data-brand="Daily Health & Clean" onclick="selectBrand('Daily Health & Clean')">
+                    <div class="brand-pill-name">
+                        <span>Daily Health & Clean</span>
+                        <span class="brand-pill-group">Group A</span>
+                    </div>
+                    <div class="brand-pill-quota">Feed 1/hari • Story 10/hari • Reels min 4/minggu</div>
+                </div>
+                <div class="brand-pill" data-brand="Doughnut & Donut" onclick="selectBrand('Doughnut & Donut')">
+                    <div class="brand-pill-name">
+                        <span>Doughnut & Donut</span>
+                        <span class="brand-pill-group">Group B</span>
+                    </div>
+                    <div class="brand-pill-quota">Feed 15/bulan • Story 10/hari • Reels 15/bulan</div>
+                </div>
+                <div class="brand-pill" data-brand="Jakarta Oleh-oleh" onclick="selectBrand('Jakarta Oleh-oleh')">
+                    <div class="brand-pill-name">
+                        <span>Jakarta Oleh-oleh</span>
+                        <span class="brand-pill-group">Group B</span>
+                    </div>
+                    <div class="brand-pill-quota">Feed 15/bulan • Story 10/hari • Reels 15/bulan</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <!-- LEFT COLUMN: INPUT CONTROLS -->
+            <div class="left-col">
+                
+                <!-- Card 1: Informasi Laporan -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="icon-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </span>
+                            Informasi General
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="picName">Nama PIC / Specialist</label>
+                            <input type="text" id="picName" value="Raffi" placeholder="Nama PIC">
+                        </div>
+                        <div class="form-group">
+                            <label for="reportTitle">Judul Daily Report</label>
+                            <input type="text" id="reportTitle" value="Daily Report" placeholder="Judul Daily Report">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="monthSelect">Bulan Periode</label>
+                            <select id="monthSelect">
+                                <option value="Januari">Januari</option>
+                                <option value="Februari">Februari</option>
+                                <option value="Maret">Maret</option>
+                                <option value="April">April</option>
+                                <option value="Mei">Mei</option>
+                                <option value="Juni">Juni</option>
+                                <option value="Juli">Juli</option>
+                                <option value="Agustus">Agustus</option>
+                                <option value="September">September</option>
+                                <option value="Oktober">Oktober</option>
+                                <option value="November">November</option>
+                                <option value="Desember">Desember</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="platformTag">Platform Target</label>
+                            <input type="text" id="platformTag" value="Instagram & TikTok" placeholder="Platform">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Checklist Task Rutin (Presets) -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="icon-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </span>
+                            Action Plan / Tasks (<span id="taskBrandBadge">Tosca Care</span>)
+                        </div>
+                    </div>
+                    
+                    <div class="task-list" id="taskList">
+                        <!-- Loaded dynamically per brand group -->
+                    </div>
+
+                    <button type="button" class="btn-add-task" onclick="addTask()">
+                        <span>➕ Tambah Item Task Baru</span>
+                    </button>
+                </div>
+
+                <!-- Card 3: Kalender Tracker Progress Medsos -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="icon-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            </span>
+                            Kalender Tracker Progress Medsos (<span id="calendarMonthBadge">Agustus</span>)
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button type="button" class="btn-chip btn-chip-primary" onclick="setAllDoneUntilToday()">⚡ Selesai s/d Hari Ini</button>
+                        <button type="button" class="btn-chip" onclick="setAllDates('done')">✅ Semua Done</button>
+                        <button type="button" class="btn-chip" onclick="setAllDates('process')">⏳ Dalam Proses</button>
+                        <button type="button" class="btn-chip" onclick="setAllDates('pending')">❌ Reset Semua</button>
+                    </div>
+
+                    <!-- Calendar Day Name Headers -->
+                    <div class="calendar-header-days">
+                        <div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Ming</div>
+                    </div>
+
+                    <div class="date-grid calendar-grid" id="dateGrid">
+                        <!-- Dynamic Calendar Grid Cells -->
+                    </div>
+
+                    <div style="margin-top: 1.25rem;">
+                        <div class="progress-stats">
+                            <span>Pencapaian Periode Medsos</span>
+                            <span id="progressText">0 / 0 (0%)</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Additional Performance Metrics & Quota Tracker -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="icon-badge">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            </span>
+                            Metrik Performa & Quota Tracker
+                        </div>
+                    </div>
+
+                    <!-- OCR Image Upload Zone -->
+                    <div class="ocr-dropzone" id="ocrDropzone" onclick="document.getElementById('ocrFileInput').click()">
+                        <input type="file" id="ocrFileInput" accept="image/*" style="display: none;" onchange="handleOCRImage(this)">
+                        <div class="ocr-dropzone-content">
+                            <div class="ocr-icon-wrap">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                            </div>
+                            <div class="ocr-text">
+                                <strong>Upload Screenshot Analytics (Auto Scan)</strong>
+                                <p>Klik / tarik & lepas gambar screenshot dashboard di sini untuk baca metrik otomatis</p>
+                            </div>
+                        </div>
+                        <div id="ocrStatus" class="ocr-status" style="display: none;">
+                            <span class="spinner">⏳</span> <span id="ocrStatusText">Menganalisis screenshot...</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reelsCount">Total Reels/TikTok Uploaded</label>
+                            <input type="number" id="reelsCount" value="" placeholder="Target per brand">
+                        </div>
+                        <div class="form-group">
+                            <label for="posterCount">Total Poster/Feed Uploaded</label>
+                            <input type="number" id="posterCount" value="" placeholder="Target per brand">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="totalViews">Total Views (Reels & TikTok)</label>
+                            <input type="text" id="totalViews" value="" placeholder="Contoh: 50K">
+                        </div>
+                        <div class="form-group">
+                            <label for="chatCount">Respons Chat & Komen</label>
+                            <input type="text" id="chatCount" value="" placeholder="100%">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="notesText">Catatan / Insight Khusus</label>
+                        <textarea id="notesText" rows="2" placeholder="Contoh: Postingan promo mendapat engagement paling tinggi."></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: LIVE WA PREVIEW & COPY / SAVE -->
+            <div class="right-col">
+                <div class="card" style="position: sticky; top: 1rem;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="icon-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #34d399;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </span>
+                            Preview Format WhatsApp
+                        </div>
+                    </div>
+
+                    <!-- Format Mode Switcher -->
+                    <div style="display:flex; gap:8px; margin-bottom:1.25rem;">
+                        <button type="button" class="btn-chip btn-chip-primary" id="btnWaSingleFormat" onclick="setWAReportFormatMode('single')" style="flex:1; justify-content:center;">📌 Single Brand</button>
+                        <button type="button" class="btn-chip" id="btnWaAllInOneFormat" onclick="setWAReportFormatMode('all_in_one')" style="flex:1; justify-content:center;">🚀 All-in-One (4 Brand)</button>
+                    </div>
+
+                    <div class="wa-mock-frame">
+                        <div class="wa-header-bar">
+                            <div class="wa-avatar" id="waAvatarBadge">TC</div>
+                            <div class="wa-contact-info">
+                                <h4 id="waContactHeader">Tosca Care Daily Report</h4>
+                                <p>Online • Executive Format</p>
+                            </div>
+                        </div>
+                        <div class="wa-bubble-container">
+                            <div class="wa-bubble" id="waPreview">
+                                <!-- Generates formatted WA text here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons-grid">
+                        <button class="btn-action btn-copy" onclick="copyToClipboard()">
+                            <span>📋 Copy Text WA</span>
+                        </button>
+                        <button class="btn-action btn-save-db" onclick="saveReportToDB(false)">
+                            <span>💾 Simpan Laporan</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: EXECUTIVE DASHBOARD MODE (ATASAN VIEW) -->
+    <div id="viewExecutive" style="display: none;">
+        <header>
+            <div class="badge-status">
+                <span class="pulse-dot"></span> Executive Oversight & Analytics
+            </div>
+            <h1>Dashboard Performa Multi-Brand</h1>
+            <p>Rekapitulasi real-time pencapaian target kuota, total tayangan, dan arsip laporan harian 4 brand</p>
+        </header>
+
+        <!-- KPI Summary Cards -->
+        <div class="kpi-summary-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon">📦</div>
+                <div>
+                    <div class="kpi-val" id="kpiTotalPosters">0</div>
+                    <div class="kpi-lbl">Total Feed/Poster Uploaded</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:rgba(56,189,248,0.12); color:var(--accent-blue);">🎬</div>
+                <div>
+                    <div class="kpi-val" id="kpiTotalReels">0</div>
+                    <div class="kpi-lbl">Total Reels/TikTok Content</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:rgba(168,85,247,0.12); color:var(--accent-purple);">👁️</div>
+                <div>
+                    <div class="kpi-val" id="kpiTotalViews">45.8K+</div>
+                    <div class="kpi-lbl">Accumulated Reach / Views</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:rgba(16,185,129,0.12); color:var(--accent-green);">🎯</div>
+                <div>
+                    <div class="kpi-val" id="kpiAvgCompletion">0%</div>
+                    <div class="kpi-lbl">Rata-rata Pencapaian Target</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Brands Quota Fulfillment Grid -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    </span>
+                    Status Pencapaian Quota 4 Brand
+                </div>
+            </div>
+
+            <div class="brand-pills" style="margin-bottom:0;">
+                <div class="brand-pill" style="cursor:default;">
+                    <div class="brand-pill-name">
+                        <span>Tosca Care</span>
+                        <span class="brand-pill-group">Group A</span>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <div style="font-size:0.8rem; color:var(--text-muted); display:flex; justify-shadow:space-between; justify-content:space-between; margin-bottom:4px;">
+                            <span>Progress Checklist</span>
+                            <span id="execProgressTosca">0%</span>
+                        </div>
+                        <div class="progress-bar-container" style="height:8px;"><div class="progress-bar-fill" id="execBarTosca" style="width:0%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="brand-pill" style="cursor:default;">
+                    <div class="brand-pill-name">
+                        <span>Daily Health & Clean</span>
+                        <span class="brand-pill-group">Group A</span>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <div style="font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span>Progress Checklist</span>
+                            <span id="execProgressDaily">0%</span>
+                        </div>
+                        <div class="progress-bar-container" style="height:8px;"><div class="progress-bar-fill" id="execBarDaily" style="width:0%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="brand-pill" style="cursor:default;">
+                    <div class="brand-pill-name">
+                        <span>Doughnut & Donut</span>
+                        <span class="brand-pill-group">Group B</span>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <div style="font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span>Progress Checklist</span>
+                            <span id="execProgressDonut">0%</span>
+                        </div>
+                        <div class="progress-bar-container" style="height:8px;"><div class="progress-bar-fill" id="execBarDonut" style="width:0%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="brand-pill" style="cursor:default;">
+                    <div class="brand-pill-name">
+                        <span>Jakarta Oleh-oleh</span>
+                        <span class="brand-pill-group">Group B</span>
+                    </div>
+                    <div style="margin-top:10px;">
+                        <div style="font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span>Progress Checklist</span>
+                            <span id="execProgressJakarta">0%</span>
+                        </div>
+                        <div class="progress-bar-container" style="height:8px;"><div class="progress-bar-fill" id="execBarJakarta" style="width:0%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Minimalist Bagan Analytics Chart Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon-badge" style="background:rgba(168,85,247,0.15); color:var(--accent-purple);">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    </span>
+                    Bagan Analisis Performa 4 Brand (Minimalist Chart)
+                </div>
+                <button type="button" class="btn-chip" onclick="fetchExecutiveReports()">🔄 Refresh Bagan</button>
+            </div>
+            <div style="height: 300px; position: relative;">
+                <canvas id="analyticsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Historical Reports Summary Table (Deduplicated) -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 8 12 12 14 14"></polyline><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path></svg>
+                    </span>
+                    Rekap Laporan Terbaru (Minimalist Table)
+                </div>
+                <button type="button" class="btn-chip btn-chip-primary" onclick="exportReportsCSV()">📥 Export Rekap CSV</button>
+            </div>
+
+            <!-- Table Filters -->
+            <div style="display:flex; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+                <div style="flex:1; min-width:180px;">
+                    <select id="filterBrandSelect" onchange="renderReportsTable()">
+                        <option value="all">Semua Brand</option>
+                        <option value="Tosca Care">Tosca Care</option>
+                        <option value="Daily Health & Clean">Daily Health & Clean</option>
+                        <option value="Doughnut & Donut">Doughnut & Donut</option>
+                        <option value="Jakarta Oleh-oleh">Jakarta Oleh-oleh</option>
+                    </select>
+                </div>
+                <div style="flex:1; min-width:180px;">
+                    <select id="filterMonthSelect" onchange="renderReportsTable()">
+                        <option value="all">Semua Bulan</option>
+                        <option value="Januari">Januari</option>
+                        <option value="Februari">Februari</option>
+                        <option value="Maret">Maret</option>
+                        <option value="April">April</option>
+                        <option value="Mei">Mei</option>
+                        <option value="Juni">Juni</option>
+                        <option value="Juli">Juli</option>
+                        <option value="Agustus">Agustus</option>
+                        <option value="September">September</option>
+                        <option value="Oktober">Oktober</option>
+                        <option value="November">November</option>
+                        <option value="Desember">Desember</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu Submit</th>
+                            <th>Brand</th>
+                            <th>PIC</th>
+                            <th>Bulan</th>
+                            <th>Feed/Poster</th>
+                            <th>Reels/TikTok</th>
+                            <th>Views</th>
+                            <th>Progress (%)</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Modal Config Supabase -->
+<div class="modal-backdrop" id="supabaseModal">
+    <div class="modal-box">
+        <div class="modal-title">
+            <span>⚡ Konfigurasi Supabase Database</span>
+            <button type="button" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;" onclick="closeSupabaseModal()">✕</button>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.5;">
+            Masukkan URL dan Public Anon Key Supabase Anda untuk mengaktifkan penyimpanan database cloud real-time. (Jika belum diisi, laporan akan tersimpan di Storage Lokal).
+        </p>
+        <div class="form-group">
+            <label for="spUrl">Supabase Project URL</label>
+            <input type="text" id="spUrl" placeholder="https://xyzcompany.supabase.co">
+        </div>
+        <div class="form-group">
+            <label for="spKey">Supabase Anon Key</label>
+            <input type="text" id="spKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.5rem;">
+            <button class="btn-chip" onclick="closeSupabaseModal()">Batal</button>
+            <button class="btn-chip btn-chip-primary" onclick="saveSupabaseConfig()">Simpan Konfigurasi</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Laporan -->
+<div class="modal-backdrop" id="reportDetailModal">
+    <div class="modal-box" style="max-width:640px;">
+        <div class="modal-title">
+            <span id="modalReportTitle">Detail Laporan Performance</span>
+            <button type="button" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;" onclick="closeDetailModal()">✕</button>
+        </div>
+        <div class="wa-mock-frame" style="margin-top:1rem;">
+            <div class="wa-bubble-container">
+                <div class="wa-bubble" id="modalReportText">
+                    <!-- Text here -->
+                </div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1.25rem;">
+            <button class="btn-chip" onclick="closeDetailModal()">Tutup</button>
+            <button class="btn-chip btn-chip-primary" onclick="copyModalReportText()">📋 Salin Teks WA</button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Native Bottom App Bar -->
+<div class="mobile-bottom-nav">
+    <button type="button" class="mobile-nav-item active" id="mobTabSpecialist" onclick="switchNavMode('specialist')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        <span>Input</span>
+    </button>
+    <button type="button" class="mobile-nav-item" id="mobTabCalendar" onclick="scrollToCalendar()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span>Kalender</span>
+    </button>
+    <button type="button" class="mobile-nav-item" id="mobTabExecutive" onclick="switchNavMode('executive')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <span>Atasan</span>
+    </button>
+    <button type="button" class="mobile-nav-item" onclick="openSupabaseModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Seting</span>
+    </button>
+</div>
+
+<div class="toast" id="toast">
+    <span id="toastText">✅ Laporan berhasil disalin! Tinggal paste ke grup WhatsApp.</span>
+</div>
+
+<script>
+    const monthNames = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+
+    // Brands Data & Presets
+    const BRANDS_CONFIG = {
+        'Tosca Care': {
+            group: 'Group A',
+            badge: 'TC',
+            tasks: [
+                "Feed (Poster/Content) Setiap Hari 1",
+                "Upload Story 10 Mix",
+                "Reels Minimal 4 / Minggu",
+                "Balas Chat & Komen"
+            ]
+        },
+        'Daily Health & Clean': {
+            group: 'Group A',
+            badge: 'DH',
+            tasks: [
+                "Feed (Poster/Content) Setiap Hari 1",
+                "Upload Story 10 Mix",
+                "Reels Minimal 4 / Minggu",
+                "Balas Chat & Komen"
+            ]
+        },
+        'Doughnut & Donut': {
+            group: 'Group B',
+            badge: 'DD',
+            tasks: [
+                "Upload Feed (Target 15 Content / Bulan)",
+                "Upload Story 10 Mix",
+                "Upload Reels (Target 15 Video / Bulan)",
+                "Balas Chat & Komen"
+            ]
+        },
+        'Jakarta Oleh-oleh': {
+            group: 'Group B',
+            badge: 'JO',
+            tasks: [
+                "Upload Feed (Target 15 Content / Bulan)",
+                "Upload Story 10 Mix",
+                "Upload Reels (Target 15 Video / Bulan)",
+                "Balas Chat & Komen"
+            ]
+        }
+    };
+
+    let selectedBrand = 'Tosca Care';
+    let datesData = [];
+    let supabaseClient = null;
+    let cachedReports = [];
+
+    // Per-Brand Independent State Storage
+    let brandStates = JSON.parse(localStorage.getItem('brand_states_v2') || '{}');
+
+    // Initialize UI
+    function init() {
+        initSupabase();
+
+        // Auto-detect Role from URL parameter (?role=executive or ?mode=atasan)
+        const urlParams = new URLSearchParams(window.location.search);
+        const roleParam = urlParams.get('role') || urlParams.get('mode');
+
+        if (roleParam === 'executive' || roleParam === 'atasan' || roleParam === 'view') {
+            switchNavMode('executive');
+        }
+
+        // Auto-select current month & init month calendar
+        const now = new Date();
+        const currentMonthIdx = now.getMonth();
+        const monthSelect = document.getElementById('monthSelect');
+        if (monthSelect) {
+            monthSelect.value = monthNames[currentMonthIdx];
+            monthSelect.addEventListener('change', initMonthCalendar);
+        }
+
+        // Set initial brand (selectBrand handles loading/initializing its independent state)
+        selectBrand('Tosca Care');
+
+        // Drag & Drop for OCR Dropzone
+        const dropzone = document.getElementById('ocrDropzone');
+        if (dropzone) {
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--tosca-light)';
+                dropzone.style.background = 'rgba(20, 184, 166, 0.12)';
+            });
+            dropzone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'rgba(20, 184, 166, 0.35)';
+                dropzone.style.background = 'rgba(20, 184, 166, 0.04)';
+            });
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'rgba(20, 184, 166, 0.35)';
+                dropzone.style.background = 'rgba(20, 184, 166, 0.04)';
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    const input = document.getElementById('ocrFileInput');
+                    input.files = e.dataTransfer.files;
+                    handleOCRImage(input);
+                }
+            });
+        }
+    }
+
+    // Switch Navigation Mode (Specialist Input vs Executive Dashboard)
+    function switchNavMode(mode) {
+        const viewSpecialist = document.getElementById('viewSpecialist');
+        const viewExecutive = document.getElementById('viewExecutive');
+        const btnSpecialist = document.getElementById('btnModeSpecialist');
+        const btnExecutive = document.getElementById('btnModeExecutive');
+        const mobSpecialist = document.getElementById('mobTabSpecialist');
+        const mobExecutive = document.getElementById('mobTabExecutive');
+
+        if (mode === 'executive') {
+            viewSpecialist.style.display = 'none';
+            viewExecutive.style.display = 'block';
+            if (btnSpecialist) btnSpecialist.classList.remove('active');
+            if (btnExecutive) btnExecutive.classList.add('active');
+            if (mobSpecialist) mobSpecialist.classList.remove('active');
+            if (mobExecutive) mobExecutive.classList.add('active');
+            fetchExecutiveReports();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            viewSpecialist.style.display = 'block';
+            viewExecutive.style.display = 'none';
+            if (btnSpecialist) btnSpecialist.classList.add('active');
+            if (btnExecutive) btnExecutive.classList.remove('active');
+            if (mobSpecialist) mobSpecialist.classList.add('active');
+            if (mobExecutive) mobExecutive.classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function scrollToCalendar() {
+        switchNavMode('specialist');
+        const calCard = document.getElementById('dateGrid')?.closest('.card');
+        if (calCard) {
+            calCard.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // Save current brand state before switching or auto-saving
+    function saveCurrentBrandState(brandName) {
+        const targetBrand = brandName || selectedBrand;
+        if (!targetBrand) return;
+
+        brandStates[targetBrand] = {
+            datesData: JSON.parse(JSON.stringify(datesData)),
+            picName: document.getElementById('picName')?.value || 'Raffi',
+            reportTitle: document.getElementById('reportTitle')?.value || 'Daily Report',
+            monthSelect: document.getElementById('monthSelect')?.value || 'Agustus',
+            platformTag: document.getElementById('platformTag')?.value || 'Instagram & TikTok',
+            reelsCount: document.getElementById('reelsCount')?.value || '',
+            posterCount: document.getElementById('posterCount')?.value || '',
+            totalViews: document.getElementById('totalViews')?.value || '',
+            chatCount: document.getElementById('chatCount')?.value || '',
+            notesText: document.getElementById('notesText')?.value || '',
+            tasks: Array.from(document.querySelectorAll('.task-input')).map(el => el.value)
+        };
+
+        localStorage.setItem('brand_states_v2', JSON.stringify(brandStates));
+    }
+
+    // Brand Switcher with Independent State Management
+    function selectBrand(brandName) {
+        if (!BRANDS_CONFIG[brandName]) return;
+
+        // 1. Save current brand's state first
+        if (selectedBrand) {
+            saveCurrentBrandState(selectedBrand);
+        }
+
+        selectedBrand = brandName;
+
+        // 2. Update Pill UI
+        document.querySelectorAll('.brand-pill').forEach(pill => {
+            if (pill.dataset.brand === brandName) {
+                pill.classList.add('active');
+            } else {
+                pill.classList.remove('active');
+            }
+        });
+
+        // 3. Update WA Header Avatar & Title
+        const cfg = BRANDS_CONFIG[brandName];
+        document.getElementById('waAvatarBadge').innerText = cfg.badge;
+        document.getElementById('waContactHeader').innerText = `${brandName} Daily Report`;
+        document.getElementById('taskBrandBadge').innerText = brandName;
+
+        // 4. Restore brand state if exists, or initialize new month calendar
+        if (brandStates[brandName] && brandStates[brandName].datesData && brandStates[brandName].datesData.length > 0) {
+            const state = brandStates[brandName];
+            datesData = JSON.parse(JSON.stringify(state.datesData));
+            
+            if (document.getElementById('picName')) document.getElementById('picName').value = state.picName || 'Raffi';
+            if (document.getElementById('reportTitle')) document.getElementById('reportTitle').value = state.reportTitle || 'Daily Report';
+            if (document.getElementById('platformTag')) document.getElementById('platformTag').value = state.platformTag || 'Instagram & TikTok';
+            if (document.getElementById('reelsCount')) document.getElementById('reelsCount').value = state.reelsCount || '';
+            if (document.getElementById('posterCount')) document.getElementById('posterCount').value = state.posterCount || '';
+            if (document.getElementById('totalViews')) document.getElementById('totalViews').value = state.totalViews || '';
+            if (document.getElementById('chatCount')) document.getElementById('chatCount').value = state.chatCount || '';
+            if (document.getElementById('notesText')) document.getElementById('notesText').value = state.notesText || '';
+            
+            loadPresetTasks(state.tasks && state.tasks.length > 0 ? state.tasks : cfg.tasks);
+            renderDateGrid();
+            updateProgressAndMetrics();
+        } else {
+            loadPresetTasks(cfg.tasks);
+            initMonthCalendar();
+        }
+    }
+
+    function loadPresetTasks(tasksArray) {
+        const taskList = document.getElementById('taskList');
+        taskList.innerHTML = '';
+        tasksArray.forEach((taskText, idx) => {
+            const item = document.createElement('div');
+            item.className = 'task-item';
+            item.innerHTML = `
+                <span class="task-num">${idx + 1}.</span>
+                <input type="text" class="task-input" value="${taskText}" oninput="generateWAReport()">
+                <button type="button" class="btn-del-task" onclick="removeTask(this)" title="Hapus task">✕</button>
+            `;
+            taskList.appendChild(item);
+        });
+        attachInputListeners();
+    }
+
+    function attachInputListeners() {
+        document.querySelectorAll('input, select, textarea').forEach(el => {
+            if (el.id !== 'monthSelect' && el.id !== 'ocrFileInput') {
+                el.removeEventListener('input', generateWAReport);
+                el.addEventListener('input', generateWAReport);
+            }
+        });
+    }
+
+    // Dynamic Task Manager
+    function addTask() {
+        const taskList = document.getElementById('taskList');
+        const count = taskList.querySelectorAll('.task-item').length + 1;
+        const item = document.createElement('div');
+        item.className = 'task-item';
+        item.innerHTML = `
+            <span class="task-num">${count}.</span>
+            <input type="text" class="task-input" placeholder="Tuliskan tugas baru..." oninput="generateWAReport()">
+            <button type="button" class="btn-del-task" onclick="removeTask(this)" title="Hapus task">✕</button>
+        `;
+        taskList.appendChild(item);
+        renumberTasks();
+        attachInputListeners();
+        generateWAReport();
+    }
+
+    function removeTask(btn) {
+        const item = btn.closest('.task-item');
+        if (item) {
+            item.remove();
+            renumberTasks();
+            generateWAReport();
+        }
+    }
+
+    function renumberTasks() {
+        const items = document.querySelectorAll('#taskList .task-item');
+        items.forEach((item, idx) => {
+            const numSpan = item.querySelector('.task-num');
+            if (numSpan) numSpan.textContent = `${idx + 1}.`;
+        });
+    }
+
+    // Initialize Calendar Month
+    function initMonthCalendar() {
+        const monthVal = document.getElementById('monthSelect').value;
+        const monthIdx = monthNames.indexOf(monthVal);
+        const year = new Date().getFullYear();
+        
+        // Days in selected month
+        const totalDaysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+        
+        datesData = [];
+        const today = new Date();
+        const currentDay = (today.getMonth() === monthIdx) ? today.getDate() : 0;
+
+        for (let i = 1; i <= totalDaysInMonth; i++) {
+            // Default days up to today as done if in current month
+            const initialStatus = (currentDay > 0 && i <= currentDay) ? 'done' : 'pending';
+            datesData.push({ day: i, status: initialStatus });
+        }
+
+        const badge = document.getElementById('calendarMonthBadge');
+        if (badge) badge.innerText = monthVal;
+
+        renderDateGrid();
+        updateProgressAndMetrics();
+    }
+
+    // Render Date Pills Grid (Calendar View)
+    function renderDateGrid() {
+        const grid = document.getElementById('dateGrid');
+        grid.innerHTML = '';
+        const monthVal = document.getElementById('monthSelect').value;
+
+        datesData.forEach((item, index) => {
+            const pill = document.createElement('div');
+            pill.className = `date-pill ${item.status}`;
+            
+            let icon = '✅';
+            if (item.status === 'process') icon = '⏳';
+            if (item.status === 'pending') icon = '❌';
+
+            pill.innerHTML = `
+                <span class="day-num">${item.day} ${monthVal.slice(0,3)}</span>
+                <span class="status-icon" style="font-size:0.8rem; margin-top:2px;">${icon}</span>
+            `;
+
+            pill.onclick = () => toggleDateStatus(index);
+            grid.appendChild(pill);
+        });
+    }
+
+    function toggleDateStatus(index) {
+        const statuses = ['done', 'process', 'pending'];
+        const currentIdx = statuses.indexOf(datesData[index].status);
+        datesData[index].status = statuses[(currentIdx + 1) % statuses.length];
+        
+        renderDateGrid();
+        updateProgressAndMetrics();
+    }
+
+    function setAllDates(status) {
+        datesData.forEach(d => d.status = status);
+        renderDateGrid();
+        updateProgressAndMetrics();
+    }
+
+    function setAllDoneUntilToday() {
+        const monthVal = document.getElementById('monthSelect').value;
+        const monthIdx = monthNames.indexOf(monthVal);
+        const today = new Date();
+        const targetDay = (today.getMonth() === monthIdx) ? today.getDate() : datesData.length;
+
+        datesData.forEach(d => {
+            if (d.day <= targetDay) d.status = 'done';
+            else d.status = 'pending';
+        });
+
+        renderDateGrid();
+        updateProgressAndMetrics();
+        showToast("⚡ Progress diset selesai s/d hari ini!");
+    }
+
+    function updateProgressAndMetrics() {
+        const total = datesData.length;
+        const doneCount = datesData.filter(d => d.status === 'done').length;
+        const percent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').innerText = `${doneCount} / ${total} Tanggal Selesai (${percent}%)`;
+
+        // Automatically update Poster & Reels count integrated with calendar progress!
+        const cfg = BRANDS_CONFIG[selectedBrand];
+        if (cfg) {
+            if (cfg.group === 'Group A') {
+                // Group A: 1 feed per done day
+                document.getElementById('posterCount').value = doneCount;
+                // Reels: ratio ~4 per week (doneCount / 7 * 4)
+                const estimatedReels = Math.round((doneCount / 7) * 4);
+                document.getElementById('reelsCount').value = estimatedReels;
+            } else {
+                // Group B: 15/month feed & 15/month reels ratio
+                const estFeed = Math.round((doneCount / (total || 30)) * 15);
+                const estReels = Math.round((doneCount / (total || 30)) * 15);
+                document.getElementById('posterCount').value = estFeed;
+                document.getElementById('reelsCount').value = estReels;
+            }
+        }
+
+        saveCurrentBrandState(selectedBrand);
+        generateWAReport();
+    }
+
+    // WA Report Format Mode (Single vs All-in-One)
+    let waReportFormatMode = 'single';
+
+    function setWAReportFormatMode(mode) {
+        waReportFormatMode = mode;
+        const btnSingle = document.getElementById('btnWaSingleFormat');
+        const btnAllInOne = document.getElementById('btnWaAllInOneFormat');
+
+        if (mode === 'all_in_one') {
+            if (btnSingle) btnSingle.classList.remove('btn-chip-primary');
+            if (btnAllInOne) btnAllInOne.classList.add('btn-chip-primary');
+        } else {
+            if (btnSingle) btnSingle.classList.add('btn-chip-primary');
+            if (btnAllInOne) btnAllInOne.classList.remove('btn-chip-primary');
+        }
+        generateWAReport();
+    }
+
+    // Generate WA Formatted Text
+    function generateWAReport() {
+        // Guarantee current active brand's data is isolated and saved
+        saveCurrentBrandState(selectedBrand);
+
+        if (waReportFormatMode === 'all_in_one') {
+            generateAllInOneWAReport();
+            return;
+        }
+        const pic = document.getElementById('picName').value || 'Specialist';
+        const title = document.getElementById('reportTitle').value || 'Daily Report';
+        const month = document.getElementById('monthSelect').value;
+        const platform = document.getElementById('platformTag').value;
+        
+        const tasks = Array.from(document.querySelectorAll('.task-input'))
+            .map(el => el.value.trim())
+            .filter(val => val.length > 0);
+
+        const reels = document.getElementById('reelsCount').value;
+        const posters = document.getElementById('posterCount').value;
+        const views = document.getElementById('totalViews').value;
+        const chat = document.getElementById('chatCount').value;
+        const notes = document.getElementById('notesText').value;
+
+        const totalDates = datesData.length;
+        const doneDates = datesData.filter(d => d.status === 'done').length;
+        const percent = totalDates > 0 ? Math.round((doneDates / totalDates) * 100) : 0;
+
+        const totalBlocks = 10;
+        const filledBlocks = Math.round((percent / 100) * totalBlocks);
+        const progressBarStr = '█'.repeat(filledBlocks) + '░'.repeat(totalBlocks - filledBlocks);
+
+        let outputText = `📊 *LAPORAN PERFORMA SOCIAL MEDIA - ${selectedBrand.toUpperCase()}*\n`;
+        outputText += `👤 *PIC:* ${pic} | *Periode:* ${month}\n`;
+        outputText += `📱 *Platform:* ${platform}\n`;
+        outputText += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+        if (totalDates > 0) {
+            outputText += `🎯 *PROGRESS DAILY REPORT*\n`;
+            outputText += `Status: [${progressBarStr}] *${percent}% Completed*\n`;
+            outputText += `Pencapaian: *${doneDates} dari ${totalDates} Hari* Selesai ✅\n\n`;
+        }
+
+        if (tasks.length > 0) {
+            outputText += `📝 *ACTION PLAN & TASK RUTIN:*\n`;
+            tasks.forEach((t, i) => {
+                outputText += `${i+1}. ${t}\n`;
+            });
+        }
+
+        if (posters || reels || views || chat) {
+            outputText += `\n📈 *OUTPUT PERFORMA & TARGET:*\n`;
+            if (posters) outputText += `• Upload Poster/Feed: *${posters} Content*\n`;
+            if (reels) outputText += `• Upload Reels/TikTok: *${reels} Content*\n`;
+            if (views) outputText += `• Accumulative Views: *${views}*\n`;
+            if (chat) outputText += `• Respons Chat & Komen: *${chat}*\n`;
+        }
+
+        if (datesData.length > 0) {
+            outputText += `\n📅 *CHECKLIST HARI PERIODE:*\n`;
+            datesData.forEach(d => {
+                let icon = d.status === 'done' ? '✅' : (d.status === 'process' ? '⏳' : '❌');
+                outputText += `${d.day} ${month} ${icon}\n`;
+            });
+        }
+
+        if (notes) {
+            outputText += `\n💡 *HIGHLIGHT & INSIGHT:* \n_${notes}_\n`;
+        }
+
+        const previewEl = document.getElementById('waPreview');
+        if (previewEl) {
+            previewEl.innerText = outputText.trim();
+        }
+
+        // Trigger Auto Save
+        triggerAutoSave();
+    }
+
+    // All-in-One Master WA Report Generator
+    function generateAllInOneWAReport() {
+        saveCurrentBrandState(selectedBrand);
+
+        const pic = document.getElementById('picName').value || 'Raffi';
+        const month = document.getElementById('monthSelect').value;
+        const platform = document.getElementById('platformTag').value;
+
+        let outputText = `📊 *REKAP EXECUTIVE PERFORMANCE SOCIAL MEDIA (ALL-IN-ONE)*\n`;
+        outputText += `👤 *PIC:* ${pic} | *Periode:* ${month}\n`;
+        outputText += `📱 *Platform:* ${platform}\n`;
+        outputText += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+        outputText += `🎯 *RINGKASAN PERFORMANCE 4 BRAND:*\n\n`;
+
+        let masterPosters = 0;
+        let masterReels = 0;
+
+        const brandNames = Object.keys(BRANDS_CONFIG);
+        brandNames.forEach((bName, idx) => {
+            const cfg = BRANDS_CONFIG[bName];
+            const st = brandStates[bName] || {};
+            
+            const bPosters = parseInt(st.posterCount || 0);
+            const bReels = parseInt(st.reelsCount || 0);
+            const bViews = st.totalViews || '';
+            
+            masterPosters += bPosters;
+            masterReels += bReels;
+
+            const dates = st.datesData || [];
+            const doneCount = dates.filter(d => d.status === 'done').length;
+            const totalCount = dates.length || 30;
+            const pct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+            const totalBlocks = 10;
+            const filledBlocks = Math.round((pct / 100) * totalBlocks);
+            const barStr = '█'.repeat(filledBlocks) + '░'.repeat(totalBlocks - filledBlocks);
+
+            outputText += `${idx + 1}️⃣ *${bName.toUpperCase()}* (${cfg.group})\n`;
+            outputText += `   • Status: [${barStr}] *${pct}% Completed* (${doneCount}/${totalCount} Hari)\n`;
+            outputText += `   • Feed/Poster: *${bPosters} Content*\n`;
+            outputText += `   • Reels/TikTok: *${bReels} Content*\n`;
+            if (bViews) outputText += `   • Views: *${bViews}*\n`;
+            outputText += `\n`;
+        });
+
+        outputText += `━━━━━━━━━━━━━━━━━━━━━\n`;
+        outputText += `📈 *TOTAL OUTPUT SELURUH BRAND:*\n`;
+        outputText += `• Total Feed/Poster: *${masterPosters} Content*\n`;
+        outputText += `• Total Reels/TikTok: *${masterReels} Content*\n`;
+
+        const notes = document.getElementById('notesText').value;
+        if (notes) {
+            outputText += `\n💡 *HIGHLIGHT & INSIGHT:* \n_${notes}_\n`;
+        }
+
+        const previewEl = document.getElementById('waPreview');
+        if (previewEl) {
+            previewEl.innerText = outputText.trim();
+        }
+
+        triggerAutoSave();
+    }
+
+    // Copy & Save Functions
+    function copyToClipboard() {
+        const text = document.getElementById('waPreview').innerText;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("✅ Laporan berhasil disalin! Tinggal paste ke grup WhatsApp.");
+            }).catch(err => {
+                fallbackCopy(text);
+            });
+        } else {
+            fallbackCopy(text);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast("✅ Laporan berhasil disalin! Tinggal paste ke grup WhatsApp.");
+    }
+
+    // Debounced Auto Save to Supabase / Local Storage
+    let autoSaveTimer = null;
+    function triggerAutoSave() {
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            saveReportToDB(true);
+        }, 1200);
+    }
+
+    async function saveReportToDB(isSilent = false) {
+        // Always persist current brand state locally
+        saveCurrentBrandState(selectedBrand);
+
+        const text = document.getElementById('waPreview').innerText;
+        if (!text) return;
+
+        // In silent auto-save mode, just update brand state without spamming DB rows
+        if (isSilent) return;
+
+        const reportData = {
+            brand_name: selectedBrand,
+            pic_name: document.getElementById('picName').value || 'Raffi',
+            report_title: document.getElementById('reportTitle').value || 'Daily Report',
+            month_name: document.getElementById('monthSelect').value,
+            platform: document.getElementById('platformTag').value,
+            reels_count: parseInt(document.getElementById('reelsCount').value || 0),
+            poster_count: parseInt(document.getElementById('posterCount').value || 0),
+            total_views: document.getElementById('totalViews').value || '',
+            chat_response: document.getElementById('chatCount').value || '',
+            notes: document.getElementById('notesText').value || '',
+            progress_percentage: datesData.length > 0 ? Math.round((datesData.filter(d => d.status === 'done').length / datesData.length) * 100) : 0,
+            completed_days: datesData.filter(d => d.status === 'done').length,
+            total_days: datesData.length,
+            raw_wa_text: text,
+            saved_at: new Date().toISOString()
+        };
+
+        if (supabaseClient) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('daily_reports')
+                    .insert([reportData]);
+                
+                if (error) throw error;
+                showToast("⚡ Laporan tersimpan di Supabase DB Cloud!");
+                return;
+            } catch (err) {
+                console.warn("Supabase Error, saving to Local Storage:", err);
+            }
+        }
+
+        // Fallback Local Storage
+        let reports = JSON.parse(localStorage.getItem('saved_reports') || '[]');
+        reports.push(reportData);
+        if (reports.length > 50) reports = reports.slice(-50);
+        localStorage.setItem('saved_reports', JSON.stringify(reports));
+        showToast("💾 Laporan tersimpan di Local Storage!");
+    }
+
+    // Fetch Executive Reports & Update Dashboard UI
+    async function fetchExecutiveReports() {
+        let reports = [];
+
+        if (supabaseClient) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('daily_reports')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (!error && data) reports = data;
+            } catch(e) {
+                console.warn("Error fetching Supabase reports:", e);
+            }
+        }
+
+        if (reports.length === 0) {
+            reports = JSON.parse(localStorage.getItem('saved_reports') || '[]');
+        }
+
+        cachedReports = reports;
+        renderExecutiveMetrics(reports);
+        renderPerformanceChart(reports);
+        renderReportsTable();
+    }
+
+    function renderExecutiveMetrics(reports) {
+        let totalPosters = 0;
+        let totalReels = 0;
+        let totalPct = 0;
+        let brandPct = { 'Tosca Care': [], 'Daily Health & Clean': [], 'Doughnut & Donut': [], 'Jakarta Oleh-oleh': [] };
+
+        reports.forEach(r => {
+            totalPosters += r.poster_count || 0;
+            totalReels += r.reels_count || 0;
+            totalPct += r.progress_percentage || 0;
+            if (brandPct[r.brand_name]) {
+                brandPct[r.brand_name].push(r.progress_percentage || 0);
+            }
+        });
+
+        document.getElementById('kpiTotalPosters').innerText = totalPosters;
+        document.getElementById('kpiTotalReels').innerText = totalReels;
+        const avgOverall = reports.length > 0 ? Math.round(totalPct / reports.length) : 0;
+        document.getElementById('kpiAvgCompletion').innerText = `${avgOverall}%`;
+
+        // Update Brand Cards
+        const calcAvg = arr => arr.length > 0 ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
+
+        const toscaVal = calcAvg(brandPct['Tosca Care']);
+        document.getElementById('execProgressTosca').innerText = `${toscaVal}%`;
+        document.getElementById('execBarTosca').style.width = `${toscaVal}%`;
+
+        const dailyVal = calcAvg(brandPct['Daily Health & Clean']);
+        document.getElementById('execProgressDaily').innerText = `${dailyVal}%`;
+        document.getElementById('execBarDaily').style.width = `${dailyVal}%`;
+
+        const donutVal = calcAvg(brandPct['Doughnut & Donut']);
+        document.getElementById('execProgressDonut').innerText = `${donutVal}%`;
+        document.getElementById('execBarDonut').style.width = `${donutVal}%`;
+
+        const jakartaVal = calcAvg(brandPct['Jakarta Oleh-oleh']);
+        document.getElementById('execProgressJakarta').innerText = `${jakartaVal}%`;
+        document.getElementById('execBarJakarta').style.width = `${jakartaVal}%`;
+    }
+
+    // Chart.js Bagan Analytics Renderer
+    let performanceChart = null;
+    function renderPerformanceChart(reports) {
+        const canvas = document.getElementById('analyticsChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const brandData = {
+            'Tosca Care': { feed: 0, reels: 0, progress: 0 },
+            'Daily Health & Clean': { feed: 0, reels: 0, progress: 0 },
+            'Doughnut & Donut': { feed: 0, reels: 0, progress: 0 },
+            'Jakarta Oleh-oleh': { feed: 0, reels: 0, progress: 0 }
+        };
+
+        // Populate from live brandStates
+        Object.keys(BRANDS_CONFIG).forEach(bName => {
+            if (brandStates[bName]) {
+                const st = brandStates[bName];
+                brandData[bName].feed = parseInt(st.posterCount || 0);
+                brandData[bName].reels = parseInt(st.reelsCount || 0);
+                const total = st.datesData ? st.datesData.length : 0;
+                const done = st.datesData ? st.datesData.filter(d => d.status === 'done').length : 0;
+                brandData[bName].progress = total > 0 ? Math.round((done / total) * 100) : 0;
+            }
+        });
+
+        // Also check reports for latest values if higher
+        reports.forEach(r => {
+            if (brandData[r.brand_name]) {
+                if ((r.poster_count || 0) > brandData[r.brand_name].feed) brandData[r.brand_name].feed = r.poster_count;
+                if ((r.reels_count || 0) > brandData[r.brand_name].reels) brandData[r.brand_name].reels = r.reels_count;
+                if ((r.progress_percentage || 0) > brandData[r.brand_name].progress) brandData[r.brand_name].progress = r.progress_percentage;
+            }
+        });
+
+        const labels = Object.keys(brandData);
+        const feedValues = labels.map(l => brandData[l].feed);
+        const reelsValues = labels.map(l => brandData[l].reels);
+        const progressValues = labels.map(l => brandData[l].progress);
+
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+
+        if (typeof Chart === 'undefined') return;
+
+        performanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Feed / Poster',
+                        data: feedValues,
+                        backgroundColor: 'rgba(20, 184, 166, 0.7)',
+                        borderColor: '#2dd4bf',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    },
+                    {
+                        label: 'Reels / TikTok',
+                        data: reelsValues,
+                        backgroundColor: 'rgba(56, 189, 248, 0.7)',
+                        borderColor: '#38bdf8',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    },
+                    {
+                        label: '% Target Quota',
+                        data: progressValues,
+                        type: 'line',
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointRadius: 5,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#cbd5e1', font: { family: 'Plus Jakarta Sans', weight: '600' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans' } },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    },
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        title: { display: true, text: 'Jumlah Konten', color: '#94a3b8' }
+                    },
+                    y1: {
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        ticks: { color: '#a855f7', callback: v => v + '%' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderReportsTable() {
+        const tbody = document.getElementById('reportsTableBody');
+        const filterBrand = document.getElementById('filterBrandSelect').value;
+        const filterMonth = document.getElementById('filterMonthSelect').value;
+
+        tbody.innerHTML = '';
+
+        // Deduplicate auto-saved reports: keep only latest per brand + month
+        const seenMap = new Map();
+        cachedReports.forEach(r => {
+            const key = `${r.brand_name}_${r.month_name}`;
+            if (!seenMap.has(key)) {
+                seenMap.set(key, r);
+            }
+        });
+        const deduplicated = Array.from(seenMap.values());
+
+        let filtered = deduplicated.filter(r => {
+            const matchBrand = filterBrand === 'all' || r.brand_name === filterBrand;
+            const matchMonth = filterMonth === 'all' || r.month_name === filterMonth;
+            return matchBrand && matchMonth;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                        ⚡ Belum ada histori laporan tersimpan untuk filter ini.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        filtered.forEach((r, idx) => {
+            const tr = document.createElement('tr');
+            const dateStr = r.saved_at || r.created_at ? new Date(r.saved_at || r.created_at).toLocaleString('id-ID', { dateStyle:'short', timeStyle:'short' }) : '-';
+            
+            tr.innerHTML = `
+                <td>${dateStr}</td>
+                <td><strong style="color:var(--tosca-light);">${r.brand_name}</strong></td>
+                <td>${r.pic_name}</td>
+                <td>${r.month_name}</td>
+                <td>${r.poster_count || 0}</td>
+                <td>${r.reels_count || 0}</td>
+                <td>${r.total_views || '-'}</td>
+                <td>
+                    <span style="font-weight:700; color:${r.progress_percentage > 70 ? '#34d399' : '#fbbf24'};">${r.progress_percentage || 0}%</span>
+                </td>
+                <td>
+                    <button class="btn-chip" onclick="openDetailModal(${idx})">👁️ Detail</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    let activeDetailText = '';
+    function openDetailModal(idx) {
+        const report = cachedReports[idx];
+        if (!report) return;
+        activeDetailText = report.raw_wa_text || '';
+        document.getElementById('modalReportTitle').innerText = `${report.brand_name} - ${report.month_name} (${report.pic_name})`;
+        document.getElementById('modalReportText').innerText = activeDetailText;
+        document.getElementById('reportDetailModal').classList.add('active');
+    }
+
+    function closeDetailModal() {
+        document.getElementById('reportDetailModal').classList.remove('active');
+    }
+
+    function copyModalReportText() {
+        if (!activeDetailText) return;
+        fallbackCopy(activeDetailText);
+    }
+
+    function exportReportsCSV() {
+        if (cachedReports.length === 0) {
+            alert("Belum ada data untuk diekspor.");
+            return;
+        }
+
+        let csv = "Waktu Submit,Brand,PIC,Bulan,Platform,Poster/Feed,Reels/TikTok,Total Views,Respons Chat,Progress (%)\n";
+        cachedReports.forEach(r => {
+            csv += `"${r.saved_at || ''}","${r.brand_name}","${r.pic_name}","${r.month_name}","${r.platform}",${r.poster_count || 0},${r.reels_count || 0},"${r.total_views || ''}","${r.chat_response || ''}",${r.progress_percentage || 0}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Rekap_SaaS_Performance_${selectedBrand}_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("📥 Rekap CSV berhasil di-download!");
+    }
+
+    // Supabase Config Modal
+    function openSupabaseModal() {
+        const modal = document.getElementById('supabaseModal');
+        document.getElementById('spUrl').value = localStorage.getItem('sp_url') || '';
+        document.getElementById('spKey').value = localStorage.getItem('sp_key') || '';
+        modal.classList.add('active');
+    }
+
+    function closeSupabaseModal() {
+        document.getElementById('supabaseModal').classList.remove('active');
+    }
+
+    function saveSupabaseConfig() {
+        let url = document.getElementById('spUrl').value.trim();
+        let key = document.getElementById('spKey').value.trim();
+
+        // Smart Swap: if user pasted publishable key in URL input
+        if (url.startsWith('sb_publishable_') || url.startsWith('eyJ')) {
+            const temp = url;
+            url = key;
+            key = temp;
+        }
+
+        // Auto-convert Project Reference ID into full URL
+        if (url && !url.includes('.')) {
+            url = `https://${url}.supabase.co`;
+        } else if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+            url = `https://${url}`;
+        }
+
+        if (url && key) {
+            localStorage.setItem('sp_url', url);
+            localStorage.setItem('sp_key', key);
+            document.getElementById('spUrl').value = url;
+            document.getElementById('spKey').value = key;
+            initSupabase();
+            showToast("⚡ Kredensial Supabase tersimpan!");
+        } else {
+            localStorage.removeItem('sp_url');
+            localStorage.removeItem('sp_key');
+            supabaseClient = null;
+            document.getElementById('syncStatusBadge').innerText = '💾 Local Storage Mode';
+            document.getElementById('syncStatusBadge').style.borderColor = 'rgba(245,158,11,0.3)';
+            document.getElementById('syncStatusBadge').style.color = '#fbbf24';
+            showToast("ℹ️ Menggunakan Local Storage Mode.");
+        }
+        closeSupabaseModal();
+    }
+
+    async function initSupabase() {
+        let url = (localStorage.getItem('sp_url') || '').trim();
+        let key = (localStorage.getItem('sp_key') || '').trim();
+        const badge = document.getElementById('syncStatusBadge');
+
+        if (!url || !key) {
+            if (badge) {
+                badge.innerText = '💾 Local Storage Mode';
+                badge.style.borderColor = 'rgba(245,158,11,0.3)';
+                badge.style.color = '#fbbf24';
+            }
+            supabaseClient = null;
+            return;
+        }
+
+        // Auto-fix missing protocol
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+
+        const supabaseLib = window.supabase || (window.supabaseJs ? window.supabaseJs : null);
+
+        if (supabaseLib && typeof supabaseLib.createClient === 'function') {
+            try {
+                supabaseClient = supabaseLib.createClient(url, key);
+                
+                if (badge) {
+                    badge.innerText = '⚡ Connecting...';
+                    badge.style.color = 'var(--accent-blue)';
+                }
+
+                // Test live query connection to brands or daily_reports
+                const { data, error } = await supabaseClient.from('brands').select('id').limit(1);
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.warn("Supabase Test Connection Warning:", error);
+                    if (badge) {
+                        badge.innerText = '⚠️ Supabase Error (Cek Key/SQL)';
+                        badge.style.borderColor = 'rgba(239,68,68,0.3)';
+                        badge.style.color = '#f87171';
+                    }
+                } else {
+                    if (badge) {
+                        badge.innerText = '🟢 Cloud Synced';
+                        badge.style.borderColor = 'rgba(16,185,129,0.4)';
+                        badge.style.color = '#34d399';
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to init Supabase client:", e);
+                if (badge) {
+                    badge.innerText = '🔴 Connection Failed';
+                    badge.style.borderColor = 'rgba(239,68,68,0.3)';
+                    badge.style.color = '#f87171';
+                }
+            }
+        } else {
+            console.error("Supabase JS Library not loaded.");
+            if (badge) {
+                badge.innerText = '⚠️ CDN Library Error';
+                badge.style.borderColor = 'rgba(245,158,11,0.3)';
+                badge.style.color = '#fbbf24';
+            }
+        }
+    }
+
+    // Auto OCR Scanner for Analytics Screenshot
+    async function handleOCRImage(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        
+        const dropzoneContent = document.querySelector('.ocr-dropzone-content');
+        const ocrStatus = document.getElementById('ocrStatus');
+        const ocrStatusText = document.getElementById('ocrStatusText');
+
+        dropzoneContent.style.display = 'none';
+        ocrStatus.style.display = 'flex';
+        ocrStatusText.innerHTML = '<span class="spinner">⏳</span> Menganalisis screenshot...';
+
+        try {
+            if (typeof Tesseract === 'undefined') {
+                throw new Error("Library OCR belum siap. Periksa koneksi internet.");
+            }
+
+            const result = await Tesseract.recognize(file, 'eng+ind', {
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        const progress = Math.round((m.progress || 0) * 100);
+                        ocrStatusText.innerHTML = `<span class="spinner">⏳</span> Membaca & mendeteksi teks (${progress}%)...`;
+                    }
+                }
+            });
+
+            const text = result.data.text;
+            parseAndFillMetrics(text);
+
+            ocrStatusText.innerHTML = '✅ <strong>Metrik berhasil dibaca & diisi otomatis!</strong>';
+            setTimeout(() => {
+                dropzoneContent.style.display = 'flex';
+                ocrStatus.style.display = 'none';
+            }, 3000);
+
+        } catch (err) {
+            console.error("OCR Error:", err);
+            ocrStatusText.innerHTML = `❌ ${err.message || 'Gagal membaca gambar. Silakan isi manual.'}`;
+            setTimeout(() => {
+                dropzoneContent.style.display = 'flex';
+                ocrStatus.style.display = 'none';
+            }, 3500);
+        }
+    }
+
+    // Smart Parser for Analytics Text
+    function parseAndFillMetrics(text) {
+        if (!text) return;
+
+        const reelsMatch = text.match(/(?:reels|video|tiktok)[^\n0-9:]*([0-9]+)/i) ||
+                           text.match(/([0-9]+)\s*(?:reels|video|tiktok)/i);
+
+        const posterMatch = text.match(/(?:poster|post|postingan|foto|feed)[^\n0-9:]*([0-9]+)/i) ||
+                            text.match(/([0-9]+)\s*(?:poster|post|postingan)/i);
+
+        const viewsMatch = text.match(/(?:views|tayangan|impressions|tontonan|jangkauan|reach)[^\n0-9:]*([0-9]+[.,]?[0-9]*\s*[kKmM%]?|[0-9]{1,3}(?:[.,][0-9]{3})+)/i) ||
+                           text.match(/([0-9]+[.,]?[0-9]*\s*[kKmM])\s*(?:views|tayangan|impressions|reach)/i);
+
+        const chatMatch = text.match(/(?:chat|respon|response|balas|komen|comment)[^\n0-9:]*([0-9]{1,3}%\s*(?:active|fast)?)/i) ||
+                          text.match(/([0-9]{1,3}%)/);
+
+        if (reelsMatch && reelsMatch[1]) {
+            document.getElementById('reelsCount').value = reelsMatch[1];
+        }
+        if (posterMatch && posterMatch[1]) {
+            document.getElementById('posterCount').value = posterMatch[1];
+        }
+        if (viewsMatch && viewsMatch[1]) {
+            document.getElementById('totalViews').value = viewsMatch[1].trim();
+        }
+        if (chatMatch && chatMatch[1]) {
+            document.getElementById('chatCount').value = chatMatch[1].trim();
+        }
+
+        generateWAReport();
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        if (msg && toastText) toastText.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
